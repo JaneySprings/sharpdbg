@@ -26,7 +26,7 @@ public partial class ManagedDebugger
 	/// </summary>
 	public void Launch(string program, string[] args, string? workingDirectory, Dictionary<string, string>? env, bool stopAtEntry)
 	{
-		_logger?.Invoke($"Launching program: {program} {string.Join(' ', args ?? Array.Empty<string>())}");
+		_logger?.Invoke($"Launching program: {program} {string.Join(' ', args ?? [])}");
 
 		// Store launch parameters for deferred execution in ConfigurationDone
 		_pendingLaunchProgram = program;
@@ -47,7 +47,7 @@ public partial class ManagedDebugger
 		}
 
 		var program = _pendingLaunchProgram;
-		var args = _pendingLaunchArgs ?? Array.Empty<string>();
+		var args = _pendingLaunchArgs ?? [];
 		var workingDirectory = _pendingLaunchWorkingDirectory;
 		var stopAtEntry = _pendingLaunchStopAtEntry;
 

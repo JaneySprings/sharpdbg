@@ -207,7 +207,7 @@ public class DebugAdapter : DebugAdapterBase
 			throw new ProtocolException("Missing program path");
 		}
 
-		var args = GetConfigValue<string[]>(arguments.ConfigurationProperties, "args") ?? Array.Empty<string>();
+		var args = GetConfigValue<string[]>(arguments.ConfigurationProperties, "args") ?? [];
 		var cwd = GetConfigValue<string>(arguments.ConfigurationProperties, "cwd");
 		var env = GetConfigValue<Dictionary<string, string>>(arguments.ConfigurationProperties, "env");
 		var stopAtEntry = GetConfigValue<bool?>(arguments.ConfigurationProperties, "stopAtEntry") ?? false;

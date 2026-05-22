@@ -14,21 +14,20 @@ public class TcsContainer
 
 public static partial class TestHelper
 {
-	public static (DebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, OopOrInProcDebugAdapter DebugAdapterProcess, Process DebuggableProcess) GetRunningDebugProtocolHostOop(ITestOutputHelper testOutputHelper, bool startSuspended)
+	public static (DebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostOop(ITestOutputHelper testOutputHelper, bool startSuspended)
 	{
 		var process = DebugAdapterProcessHelper.GetDebugAdapterProcess();
-		var debuggableProcess = DebuggableProcessHelper.StartDebuggableProcess(startSuspended);
-		var initializedEventTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
-		var debugProtocolHost = DebugAdapterProcessHelper.GetDebugProtocolHost(process, testOutputHelper, initializedEventTcs);
-		var stoppedEventTcs = new TcsContainer { Tcs = new TaskCompletionSource<StoppedEvent>(TaskCreationOptions.RunContinuationsAsynchronously) };
-		debugProtocolHost.RegisterEventType<StoppedEvent>(@event => stoppedEventTcs.Tcs.TrySetResult(@event));
-		debugProtocolHost.Run();
-		return (debugProtocolHost, initializedEventTcs, stoppedEventTcs, new OopOrInProcDebugAdapter(process), debuggableProcess);
+		return GetRunningDebugProtocolHostCore(testOutputHelper, startSuspended, process.StandardInput.BaseStream, process.StandardOutput.BaseStream, new ProcessKiller(process));
 	}
 
-	public static (DebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostInProc(ITestOutputHelper testOutputHelper, bool startSuspended)
+	public static (DebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostInProc(ITestOutputHelper testOutputHelper, bool startSuspended)
 	{
 		var (input, output, debugAdapterDisposable) = InMemoryDebugAdapterHelper.GetAdapterStreams(testOutputHelper);
+		return GetRunningDebugProtocolHostCore(testOutputHelper, startSuspended, input, output, debugAdapterDisposable);
+	}
+
+	private static (DebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostCore(ITestOutputHelper testOutputHelper, bool startSuspended, Stream input, Stream output, IDisposable debugAdapterDisposable)
+	{
 		var debuggableProcess = DebuggableProcessHelper.StartDebuggableProcess(startSuspended);
 		var initializedEventTcs = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
 		var debugProtocolHost = DebugAdapterProcessHelper.GetDebugProtocolHost(input, output, testOutputHelper, initializedEventTcs);

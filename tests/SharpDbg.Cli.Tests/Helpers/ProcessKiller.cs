@@ -13,13 +13,13 @@ public class ProcessKiller(Process process) : IDisposable
 			try
 			{
 				process.Kill(entireProcessTree: true);
-				process.Dispose();
 			}
 			catch (Exception)
 			{
 				// Ignore exceptions during process kill
 			}
 		}
+		process.Dispose();
 	}
 }
 

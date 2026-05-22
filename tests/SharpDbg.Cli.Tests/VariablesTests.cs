@@ -15,6 +15,7 @@ public class VariablesTests(ITestOutputHelper testOutputHelper)
 		var (debugProtocolHost, initializedEventTcs, stoppedEventTcs, adapter, p2) = TestHelper.GetRunningDebugProtocolHostInProc(testOutputHelper, startSuspended);
 		using var _ = adapter;
 		using var __ = new ProcessKiller(p2);
+		using var ___ = debugProtocolHost;
 
 		await debugProtocolHost
 			.WithInitializeRequest()

@@ -108,5 +108,9 @@ public class EvalTests(ITestOutputHelper testOutputHelper)
 		evaluateResponse26.Result.Should().Be("Test = stringValue1");
 		debugProtocolHost.WithEvaluateRequest(stackFrameId, "_classWithDebugDisplay3", out var evaluateResponse27);
 		evaluateResponse27.Result.Should().Be("Test = stringValue2");
+		debugProtocolHost.WithEvaluateRequest(stackFrameId, "myInt = 5", out var evaluateResponse28);
+		evaluateResponse28.Result.Should().Be("5");
+		debugProtocolHost.WithEvaluateRequest(stackFrameId, "myInt * 2", out var evaluateResponse29);
+		evaluateResponse29.Result.Should().Be("10");
 	}
 }

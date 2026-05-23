@@ -272,24 +272,25 @@ public partial class ManagedDebugger
 		}
 		_modules.Clear();
 
+		var processIsDead = false;
+
 		// Deactivate all breakpoints
 		foreach (var bp in _breakpointManager.GetAllBreakpoints().Where(b => b.CorBreakpoint != null))
 		{
-			try
+			var hResult = bp.CorBreakpoint!.TryActivate(false);
+			if (hResult is HRESULT.CORDBG_E_PROCESS_TERMINATED)
 			{
-				bp.CorBreakpoint!.Activate(false);
+				processIsDead = true;
+				break;
 			}
-			catch (Exception ex)
-			{
-				_logger?.Invoke($"Error deactivating breakpoint during dispose: {ex.Message}");
-			}
+			_logger?.Invoke($"Failed to deactivate breakpoint during Dispose at {bp.FilePath}:{bp.Line}: {hResult}");
 		}
+		_breakpointManager.Clear();
 
 		_asyncStepper?.Dispose();
 		_asyncStepper = null;
 		_stepper = null!;
 		_threads.Clear();
-		_breakpointManager.Clear();
 		_variableManager.ClearAndDisposeHandleValues();
 
 		// Unsubscribe from callbacks to avoid any further event dispatch

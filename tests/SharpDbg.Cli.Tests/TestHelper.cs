@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol;
 using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 using SharpDbg.Cli.Tests.Helpers;
 using SharpDbg.Infrastructure.Debugger;
+using SharpDbg.InMemory;
 
 namespace SharpDbg.Cli.Tests;
 
@@ -22,8 +23,12 @@ public static partial class TestHelper
 
 	public static (DisposableDebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostInProc(ITestOutputHelper testOutputHelper, bool startSuspended)
 	{
-		var (input, output, debugAdapterDisposable) = InMemoryDebugAdapterHelper.GetAdapterStreams(testOutputHelper);
+		var (input, output, debugAdapterDisposable) = SharpDbgInMemory.NewDebugAdapterStreams(Log);
 		return GetRunningDebugProtocolHostCore(testOutputHelper, startSuspended, input, output, debugAdapterDisposable);
+		void Log(string message)
+		{
+			testOutputHelper.WriteLine($"Log [SharpDbg]: {message}");
+		}
 	}
 
 	private static (DisposableDebugProtocolHost, TaskCompletionSource InitializedEventTcs, TcsContainer StoppedEventTcs, IDisposable DebugAdapterDisposable, Process DebuggableProcess) GetRunningDebugProtocolHostCore(ITestOutputHelper testOutputHelper, bool startSuspended, Stream input, Stream output, IDisposable debugAdapterDisposable)

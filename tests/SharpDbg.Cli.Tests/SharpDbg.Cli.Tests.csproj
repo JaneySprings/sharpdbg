@@ -42,6 +42,7 @@
 
   <ItemGroup>
     <ProjectReference Include="..\..\src\SharpDbg.Cli\SharpDbg.Cli.csproj" />
+    <ProjectReference Include="..\..\src\SharpDbg.InMemory\SharpDbg.InMemory.csproj" />
 	  <!-- ensure the project we are debugging is up to date -->
     <ProjectReference Include="..\DebuggableConsoleApp\DebuggableConsoleApp.csproj" ReferenceOutputAssembly="false" />
   </ItemGroup>

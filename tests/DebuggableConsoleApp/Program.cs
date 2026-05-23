@@ -14,6 +14,7 @@ public static class Program
 		var myAsyncClass = new MyAsyncClass();
 		var myClassNoMembers = new MyClassNoMembers();
 		var hitConditionClass = new HitConditionClass();
+		var throwException = false;
 		while (true)
 		{
 			// Keep the application running to allow debugging
@@ -22,7 +23,7 @@ public static class Program
 			myClassNoMembers.MyMethod(42);
 			hitConditionClass.Test();
 			var asyncResult = myAsyncClass.MyMethodAsync(4).GetAwaiter().GetResult();
-			Exceptions.Test();
+			Exceptions.Test(throwException);
 			Thread.Sleep(100);
 			//await Task.Delay(500);
 		}

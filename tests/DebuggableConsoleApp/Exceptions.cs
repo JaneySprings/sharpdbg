@@ -2,9 +2,9 @@
 
 public static class Exceptions
 {
-	public static void Test()
+	public static void Test(bool shouldThrow)
 	{
-		var test = true;
+		var test = shouldThrow;
 		try
 		{
 			if (test)

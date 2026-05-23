@@ -467,7 +467,9 @@ public partial class ManagedDebugger
 
 		var localVariables = frame.LocalVariables;
 		var arguments = frame.Arguments;
-		if (localVariables.Length is 0 && arguments.Length is 0) return result;
+		var thread = _process!.Threads.Single(s => s.Id == variablesReference.Value.ThreadId.Value);
+		var hasCurrentException = thread.CurrentException is not null;
+		if (localVariables.Length is 0 && arguments.Length is 0 && !hasCurrentException) return result;
 
 		// can this just be the same reference?
 		var localsRef = _variableManager.CreateReference(new  VariablesReference(StoredReferenceKind.Scope, null, variablesReference.Value.ThreadId, variablesReference.Value.FrameStackDepth, null));
@@ -496,6 +498,7 @@ public partial class ManagedDebugger
 			{
 				var corDebugFunction = ilFrame.Function;
 				var module = _modules[corDebugFunction.Module.BaseAddress];
+				await AddCurrentException(result, variablesReference.ThreadId, variablesReference.FrameStackDepth);
 				var classContainingHoistedLocalsValue = await AddArguments(module, corDebugFunction, result, variablesReference.ThreadId, variablesReference.FrameStackDepth);
 				await AddLocalVariables(module, corDebugFunction, result, variablesReference.ThreadId, variablesReference.FrameStackDepth, classContainingHoistedLocalsValue);
 			}

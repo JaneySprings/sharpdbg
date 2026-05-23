@@ -133,6 +133,25 @@ public partial class ManagedDebugger
 		return classContainingHoistedLocalsValue;
 	}
 
+	private async Task AddCurrentException(List<VariableInfo> result, ThreadId threadId, FrameStackDepth stackDepth)
+	{
+		var thread = _process!.Threads.Single(s => s.Id == threadId.Value);
+		var currentException = thread.CurrentException;
+		if (currentException is not null)
+		{
+			var (friendlyTypeName, value, debuggerProxyInstance, resultIsError) = await GetValueForCorDebugValueAsync(currentException, threadId, stackDepth);
+			VariablePresentationHint? presentationHint = resultIsError ? new VariablePresentationHint { Attributes = AttributesValue.FailedEvaluation } : null;
+			result.Add(new VariableInfo
+			{
+				Name = "$exception",
+				Value = value,
+				Type = friendlyTypeName,
+				PresentationHint = presentationHint,
+				VariablesReference = GetVariablesReference(currentException, friendlyTypeName, threadId, stackDepth, debuggerProxyInstance)
+			});
+		}
+	}
+
 	private int GetVariablesReference(CorDebugValue corDebugValue, string friendlyTypeName, ThreadId threadId, FrameStackDepth stackDepth, CorDebugValue? debuggerProxyInstance)
 	{
 		var unwrappedDebugValue = corDebugValue.UnwrapDebugValue();

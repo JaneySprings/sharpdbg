@@ -468,7 +468,7 @@ public partial class ManagedDebugger
 		var localVariables = frame.LocalVariables;
 		var arguments = frame.Arguments;
 		var thread = _process!.Threads.Single(s => s.Id == variablesReference.Value.ThreadId.Value);
-		var hasCurrentException = thread.CurrentException is not null;
+		var hasCurrentException = thread.TryGetCurrentException(out _) is HRESULT.S_OK;
 		if (localVariables.Length is 0 && arguments.Length is 0 && !hasCurrentException) return result;
 
 		// can this just be the same reference?

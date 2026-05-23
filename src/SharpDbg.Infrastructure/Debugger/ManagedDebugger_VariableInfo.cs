@@ -136,7 +136,7 @@ public partial class ManagedDebugger
 	private async Task AddCurrentException(List<VariableInfo> result, ThreadId threadId, FrameStackDepth stackDepth)
 	{
 		var thread = _process!.Threads.Single(s => s.Id == threadId.Value);
-		var currentException = thread.CurrentException;
+		thread.TryGetCurrentException(out var currentException);
 		if (currentException is not null)
 		{
 			var (friendlyTypeName, value, debuggerProxyInstance, resultIsError) = await GetValueForCorDebugValueAsync(currentException, threadId, stackDepth);

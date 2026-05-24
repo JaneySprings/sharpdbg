@@ -4,6 +4,7 @@ using Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages;
 // Newtonsoft.Json.Linq is required for accessing ConfigurationProperties from LaunchArguments/AttachArguments
 // The Microsoft DAP library uses JToken for dynamic configuration properties
 using Newtonsoft.Json.Linq;
+using SharpDbg.Infrastructure.Debugger.ResponseModels;
 using MSBreakpoint = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.Breakpoint;
 using MSThread = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.Thread;
 using MSStackFrame = Microsoft.VisualStudio.Shared.VSCodeDebugProtocol.Messages.StackFrame;
@@ -195,6 +196,7 @@ public class DebugAdapter : DebugAdapterBase
 			SupportsSetVariable = false,
 			SupportsRestartFrame = false,
 			SupportsTerminateRequest = true,
+			SupportsExceptionInfoRequest = true,
 			ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter>
 			{
 				new() { Filter = "all", Label = "All Exceptions", Default = false },
@@ -491,6 +493,55 @@ public class DebugAdapter : DebugAdapterBase
 			_debugger.Terminate();
 			return new TerminateResponse();
 		});
+	}
+
+	protected override async void HandleExceptionInfoRequestAsync(IRequestResponder<ExceptionInfoArguments, ExceptionInfoResponse> responder)
+	{
+		try
+		{
+			var threadId = responder.Arguments.ThreadId;
+			var exceptionInfo = await _debugger.ExceptionInfo(new ThreadId(threadId));
+
+			var response = new ExceptionInfoResponse
+			{
+				ExceptionId = exceptionInfo.ExceptionId,
+				Description = exceptionInfo.Description,
+				BreakMode = exceptionInfo.BreakMode switch
+				{
+					SharpDbgExceptionBreakMode.Always => ExceptionBreakMode.Always,
+					SharpDbgExceptionBreakMode.Unhandled => ExceptionBreakMode.Unhandled,
+					SharpDbgExceptionBreakMode.UserUnhandled => ExceptionBreakMode.UserUnhandled,
+					_ => ExceptionBreakMode.Unknown
+				},
+				Code = exceptionInfo.Code,
+				Details = new ExceptionDetails
+				{
+					Message = exceptionInfo.Details.Message,
+					TypeName = exceptionInfo.Details.TypeName,
+					FullTypeName = exceptionInfo.Details.FullTypeName,
+					EvaluateName = exceptionInfo.Details.EvaluateName,
+					StackTrace = exceptionInfo.Details.StackTrace,
+					InnerException = exceptionInfo.Details.InnerException.Select(inner => new ExceptionDetails
+					{
+						Message = inner.Message,
+						TypeName = inner.TypeName,
+						FullTypeName = inner.FullTypeName,
+						EvaluateName = inner.EvaluateName,
+						StackTrace = inner.StackTrace,
+						InnerException = [] // Only support one level of inner exceptions for now
+					}).ToList(),
+					FormattedDescription = exceptionInfo.Details.FormattedDescription,
+					HResult = exceptionInfo.Details.HResult,
+					Source = exceptionInfo.Details.Source
+				}
+			};
+			responder.SetResponse(response);
+		}
+		catch (Exception ex)
+		{
+			_logger?.Invoke($"HandleExceptionInfoRequestAsync failed: {ex.Message} , {ex}");
+			responder.SetError(new ProtocolException($"Failed to get exception info: {ex.Message}", ex));
+		}
 	}
 
 	// Coordinate conversion helpers

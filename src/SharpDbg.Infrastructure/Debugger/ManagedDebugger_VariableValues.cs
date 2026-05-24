@@ -1,6 +1,7 @@
 ﻿using System.Collections.Immutable;
 using System.Reflection.Metadata;
 using System.Runtime.InteropServices;
+using Ardalis.GuardClauses;
 using ClrDebug;
 using SharpDbg.Infrastructure.Debugger.ExpressionEvaluator;
 using SharpDbg.Infrastructure.Debugger.ExpressionEvaluator.Compiler;
@@ -12,6 +13,7 @@ public partial class ManagedDebugger
 {
 	public async Task<(string friendlyTypeName, string value, CorDebugValue? debuggerProxyInstance, bool resultIsError)> GetValueForCorDebugValueAsync(CorDebugValue corDebugValue, ThreadId threadId, FrameStackDepth frameStackDepth)
 	{
+		Guard.Against.Null(corDebugValue);
 		var (friendlyTypeName, value, valueRequiresDebuggerDisplayEval, debuggerProxyTypeName) = GetValueForCorDebugValue(corDebugValue);
 		if (valueRequiresDebuggerDisplayEval)
 		{

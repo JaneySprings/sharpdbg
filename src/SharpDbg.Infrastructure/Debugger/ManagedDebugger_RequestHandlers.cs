@@ -621,4 +621,50 @@ public partial class ManagedDebugger
 			Dispose();
 		}
 	}
+
+	public async Task<ExceptionInfo> ExceptionInfo(ThreadId threadId)
+	{
+		_logger?.Invoke($"ExceptionInfo for thread {threadId.Value}");
+		var thread = _process!.GetThread(threadId.Value);
+		if (thread.TryGetCurrentException(out var currentException) is not HRESULT.S_OK)
+		{
+			_logger?.Invoke("No current exception");
+			throw new InvalidOperationException("No current exception on thread");
+		}
+
+		var frameStackDepth = new FrameStackDepth(0);
+		var (friendlyTypeName, _, _, _) = await GetValueForCorDebugValueAsync(currentException, threadId, frameStackDepth);
+
+		var (_, hResult, _, _) = await GetValueForCorDebugValueAsync((await currentException.GetPropertyValue(_callbacks, EvalStatus, (CorDebugILFrame)thread.ActiveFrame, "HResult"))!, threadId, frameStackDepth);
+		var (_, source, _, _) = await GetValueForCorDebugValueAsync((await currentException.GetPropertyValue(_callbacks, EvalStatus, (CorDebugILFrame)thread.ActiveFrame, "Source"))!, threadId, frameStackDepth);
+		var (_, message, _, _) = await GetValueForCorDebugValueAsync((await currentException.GetPropertyValue(_callbacks, EvalStatus, (CorDebugILFrame)thread.ActiveFrame, "Message"))!, threadId, frameStackDepth);
+		var (_, stackTrace, _, _) = await GetValueForCorDebugValueAsync((await currentException.GetPropertyValue(_callbacks, EvalStatus, (CorDebugILFrame)thread.ActiveFrame, "StackTrace"))!, threadId, frameStackDepth);
+
+		var typeNameSpan = friendlyTypeName.AsSpan();
+		var lastDot = typeNameSpan.LastIndexOf('.');
+		var exceptionTypeNameNoNamespace = lastDot is not -1
+			? typeNameSpan[(lastDot + 1)..].ToString()
+			: friendlyTypeName;
+
+		var exceptionInfo = new ExceptionInfo
+		{
+			ExceptionId = $"CLR/{friendlyTypeName}",
+			Description = $"Exception thrown: '{friendlyTypeName}' in {source}.dll: '{message}'",
+			BreakMode = SharpDbgExceptionBreakMode.Always,
+			Code = 0,
+			Details = new ExceptionInfo.ExceptionDetails
+			{
+				Message = message,
+				TypeName = exceptionTypeNameNoNamespace,
+				FullTypeName = friendlyTypeName,
+				EvaluateName = "$exception",
+				StackTrace = stackTrace,
+				InnerException = [],
+				FormattedDescription = $"**{friendlyTypeName}:** '{message}'",
+				HResult = int.Parse(hResult),
+				Source = source
+			}
+		};
+		return exceptionInfo;
+	}
 }

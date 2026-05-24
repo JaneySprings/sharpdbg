@@ -85,7 +85,7 @@ public class ExceptionTests(ITestOutputHelper testOutputHelper)
 			}
 		};
 
-		//var exceptionInfoResponse = debugProtocolHost.SendRequestSync(new ExceptionInfoRequest(stoppedEvent2.ThreadId.Value));
-		//exceptionInfoResponse.Should().BeEquivalentTo(expectedExceptionInfoResponse);
+		var exceptionInfoResponse = debugProtocolHost.SendRequestSync(new ExceptionInfoRequest(stoppedEvent2.ThreadId.Value));
+		exceptionInfoResponse.Should().BeEquivalentTo(expectedExceptionInfoResponse);
 	}
 }

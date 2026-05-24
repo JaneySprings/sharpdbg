@@ -64,5 +64,28 @@ public class ExceptionTests(ITestOutputHelper testOutputHelper)
 
 		debugProtocolHost.WithEvaluateRequest(stackTraceResponse.StackFrames.First().Id, "$exception", out var evaluateResponse2);
 		evaluateResponse2.Result.Should().Be(expectedVariables[0].Value);
+
+		var expectedExceptionInfoResponse = new ExceptionInfoResponse
+		{
+			ExceptionId = "CLR/System.InvalidOperationException",
+			Description = "Exception thrown: 'System.InvalidOperationException' in DebuggableConsoleApp.dll: 'Test exception'",
+			BreakMode = ExceptionBreakMode.Always,
+			Code = 0,
+			Details = new ExceptionDetails
+			{
+				Message = "Test exception",
+				TypeName = "InvalidOperationException",
+				FullTypeName = "System.InvalidOperationException",
+				EvaluateName = "$exception",
+				StackTrace = $"   at DebuggableConsoleApp.Exceptions.Test(Boolean shouldThrow) in {breakpointedFilePath}:line 12",
+				InnerException = [],
+				FormattedDescription = "**System.InvalidOperationException:** 'Test exception'",
+				HResult = -2146233079,
+				Source = "DebuggableConsoleApp"
+			}
+		};
+
+		var exceptionInfoResponse = debugProtocolHost.SendRequestSync(new ExceptionInfoRequest(stoppedEvent2.ThreadId.Value));
+		exceptionInfoResponse.Should().BeEquivalentTo(expectedExceptionInfoResponse);
 	}
 }

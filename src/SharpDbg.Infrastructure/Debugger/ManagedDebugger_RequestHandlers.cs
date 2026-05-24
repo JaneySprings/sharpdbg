@@ -68,8 +68,7 @@ public partial class ManagedDebugger
 		_logger?.Invoke($"Creating process for launch: {commandLine}");
 
 		// Initialize DbgShim
-		var dbgShimPath = DbgShimResolver.Resolve();
-		var dbgshim = new DbgShim(NativeLibrary.Load(dbgShimPath));
+		var dbgshim = new DbgShim(NativeLibrary.Load("dbgshim", typeof(ManagedDebugger).Assembly, null));
 
 		// Create process suspended
 		CreateProcessForLaunchResult result;

@@ -80,8 +80,7 @@ public partial class ManagedDebugger
 		_logger?.Invoke($"Attaching to process: {processId}");
 
 		// Initialize the debugger
-		var dbgShimPath = DbgShimResolver.Resolve();
-		var dbgshim = new DbgShim(NativeLibrary.Load(dbgShimPath));
+		var dbgshim = new DbgShim(NativeLibrary.Load("dbgshim", typeof(ManagedDebugger).Assembly, null));
 		_ = Task.Run(() =>
 		{
 			_corDebug = ClrDebugExtensions.Automatic(dbgshim, processId);

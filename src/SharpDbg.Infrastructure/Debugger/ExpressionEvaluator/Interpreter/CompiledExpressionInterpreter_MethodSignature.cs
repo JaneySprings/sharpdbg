@@ -94,7 +94,7 @@ public partial class CompiledExpressionInterpreter
 				// Generic type:  read base type, then argument count, then arguments
 				typeInfo.ElementType = DecodeType(ref reader);
 				int genericArgCount = reader.ReadCompressedInteger();
-				typeInfo.GenericArguments = new List<TypeInfo>();
+				typeInfo.GenericArguments = [];
 				for (int i = 0; i < genericArgCount; i++)
 				{
 					typeInfo.GenericArguments.Add(DecodeType(ref reader));

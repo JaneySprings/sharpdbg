@@ -197,11 +197,11 @@ public class DebugAdapter : DebugAdapterBase
 			SupportsRestartFrame = false,
 			SupportsTerminateRequest = true,
 			SupportsExceptionInfoRequest = true,
-			ExceptionBreakpointFilters = new List<ExceptionBreakpointsFilter>
-			{
-				new() { Filter = "all", Label = "All Exceptions", Default = false },
-				new() { Filter = "user-unhandled", Label = "User-Unhandled Exceptions", Default = true }
-			}
+			ExceptionBreakpointFilters =
+			[
+				new ExceptionBreakpointsFilter { Filter = "all", Label = "All Exceptions", Default = false },
+				new ExceptionBreakpointsFilter { Filter = "user-unhandled", Label = "User-Unhandled Exceptions", Default = true }
+			]
 		};
 	}
 
@@ -302,14 +302,14 @@ public class DebugAdapter : DebugAdapterBase
 		// Function breakpoints not yet fully implemented
 		return new SetFunctionBreakpointsResponse
 		{
-			Breakpoints = new List<MSBreakpoint>()
+			Breakpoints = []
 		};
 	}
 
 	protected override SetExceptionBreakpointsResponse HandleSetExceptionBreakpointsRequest(SetExceptionBreakpointsArguments arguments)
 	{
 		// Exception breakpoints configuration
-		_logger?.Invoke($"Exception breakpoints: {string.Join(", ", arguments?.Filters ?? new List<string>())}");
+		_logger?.Invoke($"Exception breakpoints: {string.Join(", ", arguments?.Filters ?? [])}");
 
 		return new SetExceptionBreakpointsResponse();
 	}

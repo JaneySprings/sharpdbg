@@ -59,7 +59,7 @@ public class BreakpointManager
 
 			if (!_breakpointsByFile.ContainsKey(filePath))
 			{
-				_breakpointsByFile[filePath] = new List<int>();
+				_breakpointsByFile[filePath] = [];
 			}
 			_breakpointsByFile[filePath].Add(id);
 
@@ -89,7 +89,7 @@ public class BreakpointManager
 			{
 				return ids.Select(id => _breakpoints[id]).ToList();
 			}
-			return new List<BreakpointInfo>();
+			return [];
 		}
 	}
 

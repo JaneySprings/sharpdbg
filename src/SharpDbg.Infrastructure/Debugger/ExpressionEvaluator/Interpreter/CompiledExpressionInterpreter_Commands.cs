@@ -44,7 +44,7 @@ public partial class CompiledExpressionInterpreter
 
 		evalStack.AddFirst(new EvalStackEntry
 		{
-			Identifiers = new List<string> { name },
+			Identifiers = [name],
 			GenericTypeCache = genericTypes,
 			Editable = true
 		});

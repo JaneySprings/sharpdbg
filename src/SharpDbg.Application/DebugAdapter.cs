@@ -98,7 +98,7 @@ public class DebugAdapter : DebugAdapterBase
 					Id = breakpoint.Id,
 					Verified = breakpoint.Verified,
 					Line = ConvertDebuggerLineToClient(breakpoint.Line),
-					EndLine = breakpoint.Verified ? null : null,
+					EndLine = breakpoint.Verified ? breakpoint.EndLine : null,
 					Offset = breakpoint.Verified ? 0 : null,
 					Message = breakpoint.Message,
 					Source = breakpoint.Verified is false ? null : new Source

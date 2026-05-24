@@ -17,6 +17,7 @@ public class BreakpointManager
 		public int Id { get; set; }
 		public string FilePath { get; set; } = string.Empty;
 		public int Line { get; set; }
+		public int EndLine { get; set; }
 		public bool Verified { get; set; }
 		public CorDebugFunctionBreakpoint? CorBreakpoint { get; set; }
 		public string? Message { get; set; }

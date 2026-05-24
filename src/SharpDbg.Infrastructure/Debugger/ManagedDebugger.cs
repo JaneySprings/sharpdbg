@@ -209,6 +209,8 @@ public partial class ManagedDebugger
 			// Update breakpoint info
 			bp.CorBreakpoint = corBreakpoint;
 			bp.Verified = true;
+			bp.Line = resolved.StartLine;
+			bp.EndLine = resolved.EndLine;
 			bp.ResolvedBreakpointFromPdb = resolved;
 			bp.ModuleBaseAddress = targetModule.BaseAddress;
 			bp.Message = null;

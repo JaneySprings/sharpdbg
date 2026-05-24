@@ -134,6 +134,7 @@ public partial class ManagedDebugger
 		_isAttached = true;
 
 		_logger?.Invoke($"Successfully attached to process: {processId}");
+		SendAllBreakpointEvents();
 	}
 
 	public bool RemoveBreakpoint(int id)
@@ -350,7 +351,7 @@ public partial class ManagedDebugger
 			else
 			{
 				// No process yet, mark as pending
-				bp.Message = "The breakpoint is pending and will be resolved when debugging starts.";
+				bp.Message = "Breakpoint has not been processed by the debugger.";
 			}
 
 			result.Add(bp);

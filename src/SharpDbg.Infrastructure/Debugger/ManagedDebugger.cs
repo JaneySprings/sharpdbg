@@ -93,7 +93,17 @@ public partial class ManagedDebugger
 			_isAttached = true;
 
 			_logger?.Invoke($"Attached to process: {processId}");
+			SendAllBreakpointEvents();
 		});
+	}
+
+	private void SendAllBreakpointEvents()
+	{
+		// Send a breakpoint changed event with verified false for every breakpoint, so the IDE can mark the BP as unverified, until it receives our later BP events when we bind them
+		foreach (var bp in _breakpointManager.GetAllBreakpoints())
+		{
+			OnBreakpointChanged?.Invoke(bp);
+		}
 	}
 
 	private void ContinueProcess()

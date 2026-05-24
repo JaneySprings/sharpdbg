@@ -88,24 +88,28 @@ public class DebugAdapter : DebugAdapterBase
 			Protocol.SendEvent(stoppedEvent);
 		};
 
-  //       _debugger.OnBreakpointChanged += (breakpoint) =>
-		// {
-		// 	Protocol.SendEvent(new BreakpointEvent
-		// 	{
-		// 		Reason = BreakpointEvent.ReasonValue.Changed,
-		// 		Breakpoint = new MSBreakpoint
-		// 		{
-		// 			Id = breakpoint.Id,
-		// 			Verified = breakpoint.Verified,
-		// 			Line = ConvertDebuggerLineToClient(breakpoint.Line),
-		// 			Message = breakpoint.Message,
-		// 			Source = new Source
-		// 			{
-		// 				Path = breakpoint.FilePath
-		// 			}
-		// 		}
-		// 	});
-		// };
+        _debugger.OnBreakpointChanged += breakpoint =>
+		{
+			Protocol.SendEvent(new BreakpointEvent
+			{
+				Reason = BreakpointEvent.ReasonValue.Changed,
+				Breakpoint = new MSBreakpoint
+				{
+					Id = breakpoint.Id,
+					Verified = breakpoint.Verified,
+					Line = ConvertDebuggerLineToClient(breakpoint.Line),
+					EndLine = breakpoint.Verified ? null : null,
+					Offset = breakpoint.Verified ? 0 : null,
+					Message = breakpoint.Message,
+					Source = breakpoint.Verified is false ? null : new Source
+					{
+						Path = breakpoint.FilePath,
+						Name = Path.GetFileName(breakpoint.FilePath),
+						SourceReference = 0
+					}
+				}
+			});
+		};
 
 		_debugger.OnContinued += (threadId) =>
 		{
